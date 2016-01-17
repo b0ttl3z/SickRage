@@ -208,16 +208,13 @@ class DelugeAPI(GenericClient):
 
     def _set_torrent_pause(self, result):
 
-        if sickbeard.TORRENT_PAUSED:
-            post_data = json.dumps({"method": "core.pause_torrent",
-                                    "params": [[result.hash]],
-                                    "id": 9})
+        post_data = json.dumps({"method": "core.pause_torrent" if sickbeard.TORRENT_PAUSED else "core.resume_torrent",
+                                "params": [[result.hash]],
+                                "id": 9})
 
-            self._request(method='post', data=post_data)
+        self._request(method='post', data=post_data)
 
-            return not self.response.json()['error']
-
-        return True
+        return not self.response.json()['error']
 
 
 api = DelugeAPI()

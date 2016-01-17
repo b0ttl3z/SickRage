@@ -107,9 +107,7 @@ class DelugeDAPI(GenericClient):
         return True
 
     def _set_torrent_pause(self, result):
-        if sickbeard.TORRENT_PAUSED:
-            return self.drpc.pause_torrent(result.hash)
-        return True
+        return self.drpc.pause_torrent(result.hash,pause=sickbeard.TORRENT_PAUSED)
 
     def testAuthentication(self):
         if self.connect(True) and self.drpc.test():
@@ -226,10 +224,12 @@ class DelugeRPC(object):
                 self.disconnect()
         return True
 
-    def pause_torrent(self, torrent_ids):
+    def pause_torrent(self, torrent_ids, pause=True):
         try:
             self.connect()
-            self.client.core.pause_torrent(torrent_ids).get()  # pylint:disable=no-member
+            core = self.client.core
+            method = core.pause_torrent if pause else core.resume_torrent
+            method(torrent_ids).get() # pylint:disable=no-member
         except Exception:
             return False
         finally:
